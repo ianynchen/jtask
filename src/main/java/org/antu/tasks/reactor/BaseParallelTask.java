@@ -21,7 +21,7 @@ import reactor.core.scheduler.Scheduler;
  * @param <AggregatorResponseT> aggregator response type
  * @param <ResponseT> response type a task produces
  *
- * @author yinichen
+ * @author ianynchen
  */
 public abstract class BaseParallelTask<RequestT, DependencyResponseT, AggregatorResponseT, ResponseT>
     extends BaseChainedTask<RequestT, RequestT, DependencyResponseT, AggregatorResponseT, ResponseT> {
@@ -35,7 +35,7 @@ public abstract class BaseParallelTask<RequestT, DependencyResponseT, Aggregator
   public BaseParallelTask(TaskProcessor<AggregatorResponseT, ResponseT> processor,
                           List<Task<RequestT, DependencyResponseT>> dependencyTasks,
                           TaskAggregator<DependencyResponseT, AggregatorResponseT> aggregator,
-                          @NonNull FailStrategy failStrategy) {
+                          FailStrategy failStrategy) {
     this(processor, dependencyTasks, aggregator, failStrategy, null);
   }
 
@@ -57,8 +57,8 @@ public abstract class BaseParallelTask<RequestT, DependencyResponseT, Aggregator
         .flatMap(req -> {
           // get dependency task response Mono and form Tuple2<Task, Try<DependencyResponseT>>
           return Mono.zip(dependencyTasks.stream().map(dependencyTask -> dependencyTask.execute(request)
-                  .map(response -> Tuple.of(dependencyTask, response)))
-              .collect(Collectors.toList()), tuples -> aggregator.aggregate(Arrays.stream(tuples).map(tuple -> (Tuple2<Task<RequestT, DependencyResponseT>, Try<DependencyResponseT>>)tuple)
+                  .map(response -> Tuple.of(dependencyTask.getFailStrategy(), response)))
+              .collect(Collectors.toList()), tuples -> aggregator.aggregate(Arrays.stream(tuples).map(tuple -> (Tuple2<FailStrategy, Try<DependencyResponseT>>)tuple)
               .collect(Collectors.toList()))).map(aggregatorResponse -> {
             if (aggregatorResponse.isSuccess()) {
               return Try.of(() -> processor.process(Optional.ofNullable(aggregatorResponse.get())));

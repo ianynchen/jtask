@@ -14,13 +14,21 @@ import org.antu.tasks.reactor.BaseParallelTask;
 @FunctionalInterface
 public interface TaskAggregator<TaskResponseT, AggregatorResponseT> {
 
-  default <RequestT> Try<AggregatorResponseT> aggregate(List<Tuple2<Task<RequestT, TaskResponseT>, Try<TaskResponseT>>> requesterRequestPairs) {
+  /**
+   * Aggregates exceptions from previous tasks. Throws exception if all tasks return error or if one of
+   * the tasks with TERMINATE fail strategy returns error. Throws an {@link AggregationException} with an
+   * embedded exception of the first exception of tasks with TERMINATE fail strategy, or the first task
+   * with an exception.
+   * @param requesterRequestPairs
+   * @return
+   */
+  default Try<AggregatorResponseT> aggregate(List<Tuple2<Task.FailStrategy, Try<TaskResponseT>>> requesterRequestPairs) {
 
     boolean hasTerminalErrors = false;
     int errorCount = 0;
     Throwable t = null;
 
-    for (Tuple2<Task<RequestT, TaskResponseT>, Try<TaskResponseT>> tuple: requesterRequestPairs) {
+    for (Tuple2<Task.FailStrategy, Try<TaskResponseT>> tuple: requesterRequestPairs) {
       if (tuple._2().isFailure()) {
         if (t == null) {
           t = tuple._2().getCause();
@@ -28,7 +36,7 @@ public interface TaskAggregator<TaskResponseT, AggregatorResponseT> {
         // count number of total failures
         errorCount++;
         // if dependency task is set to FAIL_ALL, terminate condition satisfies
-        if (tuple._1().getFailStrategy() == Task.FailStrategy.FAIL_ALL) {
+        if (tuple._1() == Task.FailStrategy.TERMINATE) {
           if (hasTerminalErrors == false) {
             t = tuple._2().getCause();
           }

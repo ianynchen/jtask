@@ -14,9 +14,9 @@ import reactor.core.scheduler.Scheduler;
  *
  * @param <RequestT> Input type to {@link Task}
  * @param <ResponseT> Output type from {@link Task}
- * @author yinichen
+ * @author ianynchen
  */
-public abstract class IndependentTask<RequestT, ResponseT> extends BaseTask<RequestT, RequestT, ResponseT> {
+public abstract class IndependentTask<RequestT, ResponseT> extends AbstractTask<RequestT, RequestT, ResponseT> {
 
   /**
    * Constructs an {@link IndependentTask} with fail strategy set to ignore, and uses

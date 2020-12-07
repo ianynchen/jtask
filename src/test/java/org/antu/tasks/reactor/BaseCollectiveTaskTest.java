@@ -21,7 +21,7 @@ public class BaseCollectiveTaskTest {
         Thread.sleep(100);
         System.out.println("time: " + System.currentTimeMillis() + ", Thread: " + Thread.currentThread().getName());
         return request.orElse("").length();
-      }, FailStrategy.FAIL_ALL);
+      }, FailStrategy.TERMINATE);
     }
   }
 

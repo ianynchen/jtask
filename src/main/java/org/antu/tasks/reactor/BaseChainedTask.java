@@ -17,11 +17,11 @@ import reactor.core.scheduler.Scheduler;
  * @param <DependencyResponseT> Output type from dependency task
  * @param <AggregatorResponseT> Output type from aggregator
  * @param <ResponseT> Response type of task
- * @author yinichen
+ * @author ianynchen
  */
 public abstract class BaseChainedTask<RequestT, DependencyRequestT, DependencyResponseT,
     AggregatorResponseT, ResponseT>
-    extends BaseTask<RequestT, AggregatorResponseT, ResponseT> {
+    extends AbstractTask<RequestT, AggregatorResponseT, ResponseT> {
 
   protected List<Task<DependencyRequestT, DependencyResponseT>> dependencyTasks;
 

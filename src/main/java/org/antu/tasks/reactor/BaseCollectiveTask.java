@@ -31,7 +31,7 @@ import reactor.core.scheduler.Scheduler;
  * @param <AggregatorResponseT> Output type from the {@link TaskAggregator}
  * @param <ResponseT> Output type from this task.
  *
- * @author yinichen
+ * @author ianynchen
  */
 public abstract class BaseCollectiveTask<RequestT, DependencyResponseT, AggregatorResponseT, ResponseT>
     extends BaseChainedTask<Collection<RequestT>, RequestT, DependencyResponseT, AggregatorResponseT, ResponseT> {
@@ -88,17 +88,17 @@ public abstract class BaseCollectiveTask<RequestT, DependencyResponseT, Aggregat
 
     Task<RequestT, DependencyResponseT> dependencyTask = dependencyTasks.get(0);
 
-    List<Mono<Tuple2<Task<RequestT, DependencyResponseT>, Try<DependencyResponseT>>>> dependencyResponse = request.get().stream()
+    List<Mono<Tuple2<FailStrategy, Try<DependencyResponseT>>>> dependencyResponse = request.get().stream()
         .filter(req -> req != null)
         .map(req -> Mono.just(Optional.ofNullable(req)).publishOn(scheduler())
             .flatMap(r ->dependencyTask.execute(Try.success(r))
-                .map(response -> Tuple.of(dependencyTask, response)))).collect(Collectors.toList());
+                .map(response -> Tuple.of(dependencyTask.getFailStrategy(), response)))).collect(Collectors.toList());
 
     return Mono.zip(dependencyResponse, (responseTuples) -> {
-      List<Tuple2<Task<RequestT, DependencyResponseT>, Try<DependencyResponseT>>> taskResponses = new ArrayList<>(responseTuples.length);
+      List<Tuple2<FailStrategy, Try<DependencyResponseT>>> taskResponses = new ArrayList<>(responseTuples.length);
       for (Object obj: responseTuples) {
-        Tuple2<Task<RequestT, DependencyResponseT>, Try<DependencyResponseT>> tuple =
-            (Tuple2<Task<RequestT, DependencyResponseT>, Try<DependencyResponseT>>)obj;
+        Tuple2<FailStrategy, Try<DependencyResponseT>> tuple =
+            (Tuple2<FailStrategy, Try<DependencyResponseT>>)obj;
         taskResponses.add(tuple);
       }
       return taskResponses;

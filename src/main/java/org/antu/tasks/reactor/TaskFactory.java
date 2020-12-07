@@ -13,26 +13,62 @@ import reactor.core.scheduler.Scheduler;
 /**
  * Factory to creating tasks.
  *
- * @author yinichen
+ * @author ianynchen
  */
 public class TaskFactory {
 
   private TaskFactory() {}
 
+  /**
+   * Creates an independent task, ignore any failures and use calling thread to
+   * execute this task.
+   * @param processor task processing logic
+   * @param <RequestT> task input type
+   * @param <ResponseT> task output type
+   * @return {@link IndependentTask}
+   */
   public static <RequestT, ResponseT> IndependentTask<RequestT, ResponseT> independentTask(TaskProcessor<RequestT, ResponseT> processor) {
     return independentTask(processor, Task.FailStrategy.IGNORE, null);
   }
 
+  /**
+   * Creates an indenpendent task, with specified failure strategy and use calling
+   * thread to execute this task.
+   * @param processor task processing logic
+   * @param strategy task fail strategy
+   * @param <RequestT> task input type
+   * @param <ResponseT> task output type
+   * @return {@link IndependentTask}
+   */
   public static <RequestT, ResponseT> IndependentTask<RequestT, ResponseT> independentTask(TaskProcessor<RequestT, ResponseT> processor,
                                                                                            Task.FailStrategy strategy) {
     return independentTask(processor, strategy, null);
   }
 
+  /**
+   * Creates an independent task, with errors ignored and use designated
+   * thread pool to execute this task.
+   * @param processor task processing logic
+   * @param scheduler {@link Scheduler} to run the task on
+   * @param <RequestT> task input type
+   * @param <ResponseT> task output type
+   * @return {@link IndependentTask}
+   */
   public static <RequestT, ResponseT> IndependentTask<RequestT, ResponseT> independentTask(TaskProcessor<RequestT, ResponseT> processor,
                                                                                            Scheduler scheduler) {
     return independentTask(processor, Task.FailStrategy.IGNORE, scheduler);
   }
 
+  /**
+   * Creates an independent task, with designated fail strategy and use designated
+   * thread pool to execute this task.
+   * @param processor task processing logic
+   * @param strategy how should parent task handle failure in this task
+   * @param scheduler {@link Scheduler} to run the task on
+   * @param <RequestT> task input type
+   * @param <ResponseT> task output type
+   * @return {@link IndependentTask}
+   */
   public static <RequestT, ResponseT> IndependentTask<RequestT, ResponseT> independentTask(TaskProcessor<RequestT, ResponseT> processor,
                                                                                            Task.FailStrategy strategy,
                                                                                            Scheduler scheduler) {
@@ -44,12 +80,33 @@ public class TaskFactory {
     };
   }
 
+  /**
+   * Creates a simple collective task with default failure strategy to be
+   * executed on calling thread.
+   * @param dependency dependency task for this task
+   * @param aggregator dependency aggregation logic
+   * @param <RequestT> task input type
+   * @param <DependencyResponseT> dependency task output type
+   * @param <ResponseT> task output type
+   * @return {@link SimpleCollectiveTask}
+   */
   public static <RequestT, DependencyResponseT, ResponseT>
   SimpleCollectiveTask<RequestT, DependencyResponseT, ResponseT> collectiveTask(Task<RequestT, DependencyResponseT> dependency,
                                                                                 TaskAggregator<DependencyResponseT, ResponseT> aggregator) {
     return collectiveTask(dependency, aggregator, Task.FailStrategy.IGNORE, null);
   }
 
+  /**
+   * Creates a simple collective task with designated failure strategy to be
+   * executed on calling thread.
+   * @param dependency dependency task for this task
+   * @param aggregator dependency aggregation logic
+   * @param strategy failure strategy
+   * @param <RequestT> task input type
+   * @param <DependencyResponseT> dependency task output type
+   * @param <ResponseT> task output type
+   * @return {@link SimpleCollectiveTask}
+   */
   public static <RequestT, DependencyResponseT, ResponseT>
   SimpleCollectiveTask<RequestT, DependencyResponseT, ResponseT> collectiveTask(Task<RequestT, DependencyResponseT> dependency,
                                                                                 TaskAggregator<DependencyResponseT, ResponseT> aggregator,
@@ -57,6 +114,17 @@ public class TaskFactory {
     return collectiveTask(dependency, aggregator, Task.FailStrategy.IGNORE, null);
   }
 
+  /**
+   * Creates a simple collective task with default failure strategy to be
+   * executed on designated thread pool.
+   * @param dependency dependency task for this task
+   * @param aggregator dependency aggregation logic
+   * @param scheduler thread pool to schedule this task
+   * @param <RequestT> task input type
+   * @param <DependencyResponseT> dependency task output type
+   * @param <ResponseT> task output type
+   * @return {@link SimpleCollectiveTask}
+   */
   public static <RequestT, DependencyResponseT, ResponseT>
   SimpleCollectiveTask<RequestT, DependencyResponseT, ResponseT> collectiveTask(Task<RequestT, DependencyResponseT> dependency,
                                                                                 TaskAggregator<DependencyResponseT, ResponseT> aggregator,
@@ -64,6 +132,18 @@ public class TaskFactory {
     return collectiveTask(dependency, aggregator, Task.FailStrategy.IGNORE, scheduler);
   }
 
+  /**
+   * Creates a simple collective task with designated failure strategy to be
+   * executed on designated thread pool.
+   * @param dependency dependency task for this task
+   * @param aggregator dependency aggregation logic
+   * @param strategy failure strategy
+   * @param scheduler thread pool to schedule this task
+   * @param <RequestT> task input type
+   * @param <DependencyResponseT> dependency task output type
+   * @param <ResponseT> task output type
+   * @return {@link SimpleCollectiveTask}
+   */
   public static <RequestT, DependencyResponseT, ResponseT>
   SimpleCollectiveTask<RequestT, DependencyResponseT, ResponseT> collectiveTask(Task<RequestT, DependencyResponseT> dependency,
                                                                                 TaskAggregator<DependencyResponseT, ResponseT> aggregator,

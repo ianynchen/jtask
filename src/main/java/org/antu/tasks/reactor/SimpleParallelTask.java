@@ -16,7 +16,7 @@ public class SimpleParallelTask<RequestT, DependencyResponseT, ResponseT>
 
   public SimpleParallelTask(List<Task<RequestT, DependencyResponseT>> dependencyTasks,
                             TaskAggregator<DependencyResponseT, ResponseT> aggregator,
-                            @NonNull FailStrategy failStrategy) {
+                            FailStrategy failStrategy) {
     super(req -> req.get(), dependencyTasks, aggregator, failStrategy);
   }
 
